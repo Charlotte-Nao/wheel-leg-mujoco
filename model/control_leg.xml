@@ -2,7 +2,7 @@
   <compiler angle="degree" autolimits="true"/>
 
   <option timestep="0.001"
-          gravity="0 0 -9.8"
+          gravity="0 0 0"
           integrator="implicitfast"
           solver="Newton"
           iterations="100"/>
@@ -27,13 +27,21 @@
     <light name="top_light" pos="0 -1 2" dir="0 0 -1"/>
     <camera name="side" pos="1.25 -1.8 0.85" xyaxes="0.82 0.57 0 -0.22 0.32 0.92"/>
 
+<!-- 地面 -->
     <geom name="ground"
           type="plane"
           pos="0 0 0"
-          size="2 2 0.1"
+          size="20 20 0.1"
           rgba="0.82 0.84 0.86 1"
           contype="1" conaffinity="0"/>
-    <body name="chassis" pos="0 0 0.4687463609" euler="0 0 0">
+
+<!-- 车体 -->
+    <body name="chassis" pos="0 0 0.5" euler="0 0 0">
+
+      <inertial pos="0 0 0"
+                mass="18.9"
+                diaginertia="0.30 0.589763361 0.30"/>
+
       <joint name="base_x"
              type="slide"
              axis="1 0 0"
@@ -49,14 +57,10 @@
       <joint name="base_pitch"
              type="hinge"
              axis="0 1 0"
-             ref="3"
+             ref="0"
              damping="0.02"
              armature="0.001"
              limited="false"/>
-
-      <inertial pos="0 0 0"
-            mass="18.9"
-            diaginertia="0.30 0.589763361 0.30"/>
 
       <geom name="chassis_geom"
             type="box"
@@ -65,6 +69,8 @@
             rgba="0.20 0.23 0.28 1"/>
 
       <site name="hip_AE" type="sphere" pos="0 0 0" size="0.018" rgba="1 0.25 0.2 1"/>
+
+      <!--   AB连杆   -->
       <body name="link_AB" pos="0 0 0" euler="0 120 0">
         <joint name="q1" pos="0 0 0" axis="0 1 0" ref="120"/>
 
@@ -76,8 +82,9 @@
               rgba="0.15 0.45 0.85 1"/>
         <site name="B" type="sphere" pos="0.21 0 0" size="0.014" rgba="0.2 0.6 1 1"/>
 
+        <!--  BC连杆  -->
         <body name="link_BC" pos="0.21 0 0" euler="0 -54.83458749 0">
-          <joint name="q2_passive" pos="0 0 0" axis="0 1 0" ref="-54.83458749"/>
+          <joint name="q2" pos="0 0 0" axis="0 1 0" ref="-54.83458749"/>
 
           <geom name="BC_geom"
                 type="capsule"
@@ -86,6 +93,7 @@
                 mass="0.2375"
                 rgba="0.20 0.62 0.92 1"/>
 
+          <!--  轮组  -->
           <body name="wheel" pos="0.25 0 0">
             <joint name="wheel_joint" pos="0 0 0" axis="0 1 0"
                    damping="0.002" armature="0.001"/>
@@ -104,6 +112,7 @@
         </body>
       </body>
 
+      <!--ED连杆-->
       <body name="link_ED" pos="0 0 0" euler="0 60 0">
         <joint name="q4" pos="0 0 0" axis="0 1 0" ref="60"/>
 
@@ -115,6 +124,7 @@
               rgba="0.85 0.35 0.20 1"/>
         <site name="D" type="sphere" pos="0.21 0 0" size="0.014" rgba="1 0.45 0.2 1"/>
 
+        <!--DC连杆-->
         <body name="link_DC" pos="0.21 0 0" euler="0 54.83458749 0">
           <joint name="q3_passive" pos="0 0 0" axis="0 1 0" ref="54.83458749"/>
 
