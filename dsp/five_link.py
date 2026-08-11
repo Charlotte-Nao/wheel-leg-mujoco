@@ -1,6 +1,5 @@
 """
-五连杆运动学。
-按照 MATLAB VMC.m 的几何和 +sqrt 装配分支计算 L、phi0、Jacobian 和速度。
+五连杆运动学解算
 """
 
 import numpy as np
@@ -40,13 +39,14 @@ def _geometry(q1, q4):
     x0 = xc - L_AE / 2.0
     length = np.hypot(x0, yc)
     phi0 = np.arctan2(yc, x0)
+    theta = np.pi / 2.0  - phi0
 
-    return xb, yb, xd, yd, xc, yc, phi2, phi3, length, phi0
+    return xb, yb, xd, yd, xc, yc, phi2, phi3, length, theta
 
 
 def position(q1, q4):
-    *_, length, phi0 = _geometry(q1, q4)
-    return np.array([length, phi0])
+    *_, length, theta = _geometry(q1, q4)
+    return np.array([length, theta])
 
 
 def jacobian(q1, q4):
@@ -68,9 +68,9 @@ def jacobian(q1, q4):
 
     x0 = xc - L_AE / 2.0
     J_L = np.array([x0, yc]) @ dC / length
-    J_phi = np.array([-yc, x0]) @ dC / length**2
+    J_theta =  - np.array([-yc, x0]) @ dC / length**2
 
-    return np.vstack((J_L, J_phi))
+    return np.vstack((J_L, J_theta))
 
 
 def speed(dq1, dq4, q1, q4):
@@ -78,10 +78,7 @@ def speed(dq1, dq4, q1, q4):
 
 
 def virtual_state(q1, q4, dq1, dq4):
-    length, phi0 = position(q1, q4)
-    length_rate, phi0_rate = speed(dq1, dq4, q1, q4)
-
-    theta = np.pi / 2.0 - phi0
-    theta_rate = -phi0_rate
+    length, theta = position(q1, q4)
+    length_rate, theta_rate = speed(dq1, dq4, q1, q4)
 
     return length, theta, length_rate, theta_rate
