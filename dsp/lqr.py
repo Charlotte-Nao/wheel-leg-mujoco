@@ -1,29 +1,130 @@
-"""
-LQR增益调度。
-直接读取 MATLAB 生成的 reference_lqr_build.mat，在线根据当前腿长 L 计算 K(L)，不在 Python 中重新计算 ABK、dlqr 或 polyfit。
-"""
-
-from pathlib import Path
-
 import numpy as np
-from scipy.io import loadmat
+
+L_MIN = 0.03
+L_MAX = 0.50
 
 
 class LQR:
-    def __init__(self, mat_path=None):
-        if mat_path is None:
-            mat_path = Path(__file__).with_name("reference_lqr_build.mat")
 
-        data = loadmat(mat_path)
-        self.coeff = np.asarray(data["fit_coeff"], dtype=float)
+    def __init__(self):
+        pass
 
-        if self.coeff.shape != (2, 6, 4):
-            raise ValueError(f"fit_coeff shape should be (2, 6, 4), got {self.coeff.shape}")
+    @staticmethod
+    def gain(L):
 
-    def gain(self, length):
-        c = self.coeff
-        return ((c[:, :, 0] * length + c[:, :, 1]) * length + c[:, :, 2]) * length + c[:, :, 3]
+        L = float(L)
 
-    def update(self, length, state):
+        if L < L_MIN or L > L_MAX:
+            raise ValueError(
+                f"LQR leg length out of fitted range: "
+                f"L={L:.6f} m, valid range=[{L_MIN}, {L_MAX}] m"
+            )
+
+        L2 = L * L
+        L3 = L2 * L
+
+        # MATLAB LQR_K.m 中的 mt1 ~ mt12
+
+        mt1 = (
+            -91.57829378589975 * L3
+            + 132.9394517093395 * L2
+            - 91.79266159457001 * L
+            - 4.146852634582714
+        )
+
+        mt2 = (
+            1118.129323163901 * L3
+            - 1154.406679812988 * L2
+            + 388.4858616713144 * L
+            + 37.82888594688162
+        )
+
+        mt3 = (
+            12.91057001640456 * L3
+            - 13.87136980669968 * L2
+            - 3.378651304768893 * L
+            - 0.6126296398394959
+        )
+
+        mt4 = (
+            11.86474134780292 * L3
+            - 12.94695904314299 * L2
+            + 20.34990331641504 * L
+            + 9.382767815403282
+        )
+
+        mt5 = (
+            3.966608168158497 * L3
+            + 1.746731121304405 * L2
+            - 4.685773210785289 * L
+            - 0.1176921631930111
+        )
+
+        mt6 = (
+            42.28219155954473 * L3
+            - 34.17849513287837 * L2
+            + 1.452621012875624 * L
+            + 12.42567114017193
+        )
+
+        mt7 = (
+            13.32570007122461 * L3
+            - 2.099012626714309 * L2
+            - 8.169207094062321 * L
+            - 0.5136898161990712
+        )
+
+        mt8 = (
+            26.23284228054664 * L3
+            - 11.61759623527527 * L2
+            - 13.975441383561 * L
+            + 27.15777187311295
+        )
+
+        mt9 = (
+            67.439046782533 * L3
+            - 45.67366308571393 * L2
+            - 7.270806009718521 * L
+            + 23.79044172825909
+        )
+
+        mt10 = (
+            -59.64863693345214 * L3
+            - 264.8613536966266 * L2
+            + 315.565364322733 * L
+            + 11.70243741320274
+        )
+
+        mt11 = (
+            -43.43835977895745 * L3
+            + 50.03034155163617 * L2
+            - 18.13796779515008 * L
+            + 5.205085789257
+        )
+
+        mt12 = (
+            152.918991398169 * L3
+            - 190.9579342880557 * L2
+            + 80.11090858677009 * L
+            - 8.274448326186942
+        )
+
+        K = np.array([
+            [mt1, mt3, mt5, mt7, mt9, mt11],
+            [mt2, mt4, mt6, mt8, mt10, mt12],
+        ], dtype=float)
+
+        return K
+
+    def update(self, L, state):
+
         state = np.asarray(state, dtype=float).reshape(6)
-        return -self.gain(length) @ state
+
+        K = self.gain(L)
+
+        u = -K @ state
+
+        T = float(u[0])
+        Tp = float(u[1])
+
+        return T, Tp

@@ -13,9 +13,9 @@ from dsp.vmc import update as vmc
 
 
 class Controller:
-    def __init__(self, model, lqr_path=None):
+    def __init__(self, model):
         self.model = model
-        self.lqr = LQR(lqr_path)
+        self.lqr = LQR()
 
         self.q1_qpos, self.q1_dof = self._joint("q1")
         self.q4_qpos, self.q4_dof = self._joint("q4")

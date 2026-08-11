@@ -25,7 +25,7 @@ def main():
     data = mujoco.MjData(model)
 
     mujoco.mj_forward(model, data)
-    controller = Controller(model, LQR_PATH)
+    controller = Controller(model)
     controller.reset(data)
 
     last_print = 0.0
