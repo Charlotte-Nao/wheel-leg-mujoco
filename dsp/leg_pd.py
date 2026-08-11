@@ -4,8 +4,8 @@
 """
 
 L_REF = 0.2
-KP = 150.0
-KD = 0.0
+KP = 500.0
+KD = 1000.0
 
 
 def update(length, length_rate=0.0):
