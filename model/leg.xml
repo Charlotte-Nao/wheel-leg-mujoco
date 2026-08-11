@@ -1,0 +1,161 @@
+<mujoco model="five_link_wheel_leg_2d_fall_test">
+  <compiler angle="degree" autolimits="true"/>
+
+  <option timestep="0.001"
+          gravity="0 0 -9.81"
+          integrator="implicitfast"
+          solver="Newton"
+          iterations="100"/>
+
+  <visual>
+    <headlight ambient="0.35 0.35 0.35" diffuse="0.8 0.8 0.8" specular="0.2 0.2 0.2"/>
+    <rgba joint="0.2 0.7 1 1" actuator="0.3 0.8 0.3 1"/>
+  </visual>
+
+  <default>
+    <joint type="hinge"
+           axis="0 1 0"
+           damping="0.02"
+           armature="0.0005"
+           limited="false"/>
+    <geom contype="0" conaffinity="1"
+          friction="0.8 0.02 0.001"
+          condim="3"/>
+  </default>
+
+  <worldbody>
+    <light name="top_light" pos="0 -1 2" dir="0 0 -1"/>
+    <camera name="side" pos="1.25 -1.8 0.85" xyaxes="0.82 0.57 0 -0.22 0.32 0.92"/>
+
+    <geom name="ground"
+          type="plane"
+          pos="0 0 0"
+          size="2 2 0.1"
+          rgba="0.82 0.84 0.86 1"
+          contype="1" conaffinity="0"/>
+    <body name="chassis" pos="0 0 0.4687463609" euler="0 3 0">
+      <joint name="base_x"
+             type="slide"
+             axis="1 0 0"
+             damping="0.05"
+             limited="false"/>
+
+      <joint name="base_z"
+             type="slide"
+             axis="0 0 1"
+             damping="0.05"
+             limited="false"/>
+
+      <joint name="base_pitch"
+             type="hinge"
+             axis="0 1 0"
+             ref="3"
+             damping="0.02"
+             armature="0.001"
+             limited="false"/>
+
+      <geom name="chassis_geom"
+            type="box"
+            pos="0 0 0.075"
+            size="0.18 0.075 0.055"
+            mass="18.9"
+            rgba="0.20 0.23 0.28 1"/>
+
+      <site name="hip_AE" type="sphere" pos="0 0 0" size="0.018" rgba="1 0.25 0.2 1"/>
+      <body name="link_AB" pos="0 0 0" euler="0 120 0">
+        <joint name="q1" pos="0 0 0" axis="0 1 0" ref="120"/>
+
+        <geom name="AB_geom"
+              type="capsule"
+              fromto="0 0 0  0.21 0 0"
+              size="0.012"
+              mass="0.2375"
+              rgba="0.15 0.45 0.85 1"/>
+        <site name="B" type="sphere" pos="0.21 0 0" size="0.014" rgba="0.2 0.6 1 1"/>
+
+        <body name="link_BC" pos="0.21 0 0" euler="0 -54.83458749 0">
+          <joint name="q2_passive" pos="0 0 0" axis="0 1 0" ref="-54.83458749"/>
+
+          <geom name="BC_geom"
+                type="capsule"
+                fromto="0 0 0  0.25 0 0"
+                size="0.012"
+                mass="0.2375"
+                rgba="0.20 0.62 0.92 1"/>
+
+          <body name="wheel" pos="0.25 0 0">
+            <joint name="wheel_joint" pos="0 0 0" axis="0 1 0"
+                   damping="0.002" armature="0.001"/>
+
+            <geom name="wheel_geom"
+                  type="cylinder"
+                  size="0.06 0.025"
+                  euler="90 0 0"
+                  mass="0.6"
+                  rgba="0.08 0.08 0.09 1"
+                  contype="0" conaffinity="1"
+                  friction="1.0 0.02 0.001"/>
+
+            <site name="C_left" type="sphere" pos="0 0 0" size="0.016" rgba="1 0.8 0.1 1"/>
+          </body>
+        </body>
+      </body>
+
+      <body name="link_ED" pos="0 0 0" euler="0 60 0">
+        <joint name="q4" pos="0 0 0" axis="0 1 0" ref="60"/>
+
+        <geom name="ED_geom"
+              type="capsule"
+              fromto="0 0 0  0.21 0 0"
+              size="0.012"
+              mass="0.2375"
+              rgba="0.85 0.35 0.20 1"/>
+        <site name="D" type="sphere" pos="0.21 0 0" size="0.014" rgba="1 0.45 0.2 1"/>
+
+        <body name="link_DC" pos="0.21 0 0" euler="0 54.83458749 0">
+          <joint name="q3_passive" pos="0 0 0" axis="0 1 0" ref="54.83458749"/>
+
+          <geom name="DC_geom"
+                type="capsule"
+                fromto="0 0 0  0.25 0 0"
+                size="0.012"
+                mass="0.2375"
+                rgba="0.95 0.48 0.24 1"/>
+
+          <site name="C_right" type="sphere" pos="0.25 0 0" size="0.012" rgba="0.8 0.1 0.8 0.8"/>
+        </body>
+      </body>
+    </body>
+  </worldbody>
+
+  <equality>
+    <connect name="five_link_closure"
+             site1="C_left"
+             site2="C_right"
+             solref="0.002 1"
+             solimp="0.95 0.99 0.001"/>
+  </equality>
+
+  <actuator>
+    <motor name="hip_q1_motor" joint="q1" gear="1" ctrlrange="-20 20"/>
+    <motor name="hip_q4_motor" joint="q4" gear="1" ctrlrange="-20 20"/>
+    <motor name="wheel_motor"  joint="wheel_joint" gear="1" ctrlrange="-10 10"/>
+  </actuator>
+
+  <sensor>
+    <jointpos name="base_x_pos" joint="base_x"/>
+    <jointvel name="base_x_vel" joint="base_x"/>
+    <jointpos name="base_z_pos" joint="base_z"/>
+    <jointvel name="base_z_vel" joint="base_z"/>
+    <jointpos name="base_pitch_pos" joint="base_pitch"/>
+    <jointvel name="base_pitch_vel" joint="base_pitch"/>
+
+    <jointpos name="q1_pos" joint="q1"/>
+    <jointvel name="q1_vel" joint="q1"/>
+    <jointpos name="q4_pos" joint="q4"/>
+    <jointvel name="q4_vel" joint="q4"/>
+    <jointpos name="wheel_pos" joint="wheel_joint"/>
+    <jointvel name="wheel_vel" joint="wheel_joint"/>
+    <framepos name="C_world_pos" objtype="site" objname="C_left"/>
+  </sensor>
+</mujoco>
