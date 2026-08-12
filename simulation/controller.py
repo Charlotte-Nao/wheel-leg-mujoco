@@ -62,19 +62,22 @@ class Controller:
         x_rate = (x_world - self.last_x) / dt
         self.last_x = x_world
 
-        raw_phi = float(
+
+
+        raw_qpos0 = float(self.model.qpos0[self.pitch_qpos])
+        raw_theta_rate = float(data.qvel[self.pitch_dof])
+
+        raw_theta = float(
             data.qpos[self.pitch_qpos]
-            - self.model.qpos0[self.pitch_qpos]
+            - raw_qpos0
         )
 
-        raw_phi_rate = float(data.qvel[self.pitch_dof])
+        PHI_SIGN = - 1.0  # 暂时先这样，下面通过实验确认
 
-        PHI_SIGN = -1.0  # 暂时先这样，下面通过实验确认
+        theta = PHI_SIGN * raw_theta
+        theta_rate = PHI_SIGN * raw_theta_rate
 
-        phi = PHI_SIGN * raw_phi
-        phi_rate = PHI_SIGN * raw_phi_rate
-
-        state = np.array([theta, theta_rate, x, x_rate, phi, phi_rate])
+        state = np.array([theta, theta_rate, x, x_rate, theta, theta_rate])
 
         T, Tp = self.lqr.update(length, state)
 
@@ -96,8 +99,6 @@ class Controller:
             "dtheta": theta_rate,
             "x": x,
             "dx": x_rate,
-            "phi": phi,
-            "dphi": phi_rate,
             "F": F,
             "T": T,
             "Tp": Tp,

@@ -17,7 +17,6 @@ from simulation.controller import Controller
 
 
 MODEL_PATH = ROOT / "model" / "control_leg.xml"
-LQR_PATH = ROOT / "dsp" / "reference_lqr_build.mat"
 
 
 def main():
@@ -49,7 +48,6 @@ def main():
                     f"t={data.time:6.3f}  "
                     f"L={state['L']:.4f}  "
                     f"theta={state['theta']:+.4f}  "
-                    f"phi={state['phi']:+.4f}  "
                     f"x={state['x']:+.4f}  "
                     f"F={state['F']:+.2f}  "
                     f"T={state['T']:+.2f}  "
