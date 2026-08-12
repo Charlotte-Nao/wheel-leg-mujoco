@@ -75,6 +75,7 @@ class Controller:
         phi_rate = PHI_SIGN * raw_phi_rate
 
         state = np.array([theta, theta_rate, x, x_rate, phi, phi_rate])
+
         T, Tp = self.lqr.update(length, state)
 
         F = leg_pd(length, length_rate)
