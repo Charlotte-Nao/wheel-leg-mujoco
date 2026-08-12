@@ -65,19 +65,19 @@ class Controller:
 
 
         raw_qpos0 = float(self.model.qpos0[self.pitch_qpos])
-        raw_theta_rate = float(data.qvel[self.pitch_dof])
+        raw_phi_rate = float(data.qvel[self.pitch_dof])
 
-        raw_theta = float(
+        raw_phi = float(
             data.qpos[self.pitch_qpos]
             - raw_qpos0
         )
 
         PHI_SIGN = - 1.0  # 暂时先这样，下面通过实验确认
 
-        theta = PHI_SIGN * raw_theta
-        theta_rate = PHI_SIGN * raw_theta_rate
+        raw_phi = PHI_SIGN * raw_phi
+        raw_phi_rate = PHI_SIGN * raw_phi_rate
 
-        state = np.array([theta, theta_rate, x, x_rate, theta, theta_rate])
+        state = np.array([theta, theta_rate, x, x_rate, raw_phi, raw_phi_rate])
 
         T, Tp = self.lqr.update(length, state)
 
