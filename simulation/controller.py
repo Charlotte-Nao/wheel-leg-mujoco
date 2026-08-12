@@ -72,11 +72,6 @@ class Controller:
             - raw_qpos0
         )
 
-        PHI_SIGN = - 1.0  # 暂时先这样，下面通过实验确认
-
-        raw_phi = PHI_SIGN * raw_phi
-        raw_phi_rate = PHI_SIGN * raw_phi_rate
-
         state = np.array([theta, theta_rate, x, x_rate, raw_phi, raw_phi_rate])
 
         T, Tp = self.lqr.update(length, state)
