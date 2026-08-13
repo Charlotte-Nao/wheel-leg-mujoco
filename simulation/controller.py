@@ -136,27 +136,29 @@ class Controller:
         ])
 
         T_common, Tp_common = self.lqr.update(length, state)
-        F_common = self.leg_pid.update(length, length_rate, dt)
+        left_F, right_F, delta_length = self.leg_pid.update(
+            gamma,
+            left_length,
+            right_length,
+            left_length_rate,
+            right_length_rate,
+            dt,
+        )
+        F_common = (left_F + right_F) / 2.0
 
         delta_T = yaw(alpha, alpha_rate)
         delta_Tp = theta_pd(
             left_theta - right_theta,
             left_theta_rate - right_theta_rate,
         )
-        delta_length, delta_F = roll(
-            gamma,
-            left_length,
-            right_length,
-            left_length_rate,
-            right_length_rate,
-        )
+        delta_F = roll(gamma)
 
         left_T = T_common + delta_T
         right_T = T_common - delta_T
         left_Tp = Tp_common + delta_Tp
         right_Tp = Tp_common - delta_Tp
-        left_F = F_common + delta_F
-        right_F = F_common - delta_F
+        left_F += delta_F
+        right_F -= delta_F
 
         left_tau1, left_tau4 = vmc(left_F, left_Tp, left_q1, left_q4)
         right_tau1, right_tau4 = vmc(right_F, right_Tp, right_q1, right_q4)
