@@ -57,8 +57,8 @@ def _dynamics(state, control, leg_length):
 
         Nm = M_BODY * (
             ddx
-            - (L + Lm) * ddtheta * np.cos(theta)
-            + (L + Lm) * dtheta**2 * np.sin(theta)
+            + (L + Lm) * ddtheta * np.cos(theta)
+            - (L + Lm) * dtheta**2 * np.sin(theta)
             + l * (
                 ddphi * np.cos(phi)
                 - dphi**2 * np.sin(phi)
@@ -74,8 +74,8 @@ def _dynamics(state, control, leg_length):
 
         N = Nm + M_LEG * (
             ddx
-            - L * ddtheta * np.cos(theta)
-            + L * dtheta**2 * np.sin(theta)
+            + L * ddtheta * np.cos(theta)
+            - L * dtheta**2 * np.sin(theta)
         )
 
         P = Pm + M_LEG * G + M_LEG * (
@@ -92,14 +92,14 @@ def _dynamics(state, control, leg_length):
 
         eq2 = (
             (P * L + Pm * Lm) * np.sin(theta)
-            + (N * L + Nm * Lm) * np.cos(theta)
-            + T
+            - (N * L + Nm * Lm) * np.cos(theta)
+            - T
             + Tp
             - I_LEG * ddtheta
         )
 
         eq3 = (
-            -Tp
+            Tp
             + Nm * l * np.cos(phi)
             - Pm * l * np.sin(phi)
             + I_BODY * ddphi

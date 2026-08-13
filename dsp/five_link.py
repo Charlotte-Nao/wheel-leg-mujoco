@@ -39,7 +39,7 @@ def _geometry(q1, q4):
     x0 = xc - L_AE / 2.0
     length = np.hypot(x0, yc)
     phi0 = np.arctan2(yc, x0)
-    theta = np.pi / 2.0  - phi0
+    theta = - (np.pi / 2.0 - phi0 )
 
     return xb, yb, xd, yd, xc, yc, phi2, phi3, length, theta
 
@@ -68,7 +68,7 @@ def jacobian(q1, q4):
 
     x0 = xc - L_AE / 2.0
     J_L = np.array([x0, yc]) @ dC / length
-    J_theta =  - np.array([-yc, x0]) @ dC / length**2
+    J_theta = np.array([-yc, x0]) @ dC / length**2
 
     return np.vstack((J_L, J_theta))
 
