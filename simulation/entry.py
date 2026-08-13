@@ -1,6 +1,6 @@
 """
 MuJoCo仿真入口。
-加载 control_leg.xml 和 MATLAB LQR 参数，创建总控制器并以 1 ms 周期运行闭环仿真。
+加载 control_leg.xml，创建总控制器并以 1 ms 周期运行闭环仿真。
 """
 
 import sys
@@ -48,11 +48,13 @@ def main():
                     f"t={data.time:6.3f}  "
                     f"L={state['L']:.4f}  "
                     f"theta={state['theta']:+.4f}  "
+                    f"phi={state['phi']:+.4f}  "
                     f"x={state['x']:+.4f}  "
                     f"F={state['F']:+.2f}  "
                     f"T={state['T']:+.2f}  "
                     f"Tp={state['Tp']:+.2f}  "
-                    f"tau=({state['tau1']:+.2f},{state['tau4']:+.2f})"
+                    f"left_tau=({state['left_tau1']:+.2f},{state['left_tau4']:+.2f})  "
+                    f"right_tau=({state['right_tau1']:+.2f},{state['right_tau4']:+.2f})"
                 )
                 last_print = data.time
 

@@ -65,28 +65,29 @@
       <geom name="chassis_geom"
             type="box"
             pos="0 0 0.075"
-            size="0.18 0.075 0.055"
+            size="0.18 0.25 0.055"
             rgba="0.20 0.23 0.28 1"/>
 
-      <site name="hip_AE" type="sphere" pos="0 0 0" size="0.018" rgba="1 0.25 0.2 1"/>
+      <!--   左侧腿部   -->
+      <site name="left_hip_AE" type="sphere" pos="0 0.25 0" size="0.018" rgba="1 0.25 0.2 1"/>
 
       <!--   AB连杆   -->
-      <body name="link_AB" pos="0 0 0" euler="0 120 0">
-        <joint name="q1" pos="0 0 0" axis="0 1 0" ref="120"/>
+      <body name="left_link_AB" pos="0 0.25 0" euler="0 120 0">
+        <joint name="left_q1" pos="0 0 0" axis="0 1 0" ref="120"/>
 
-        <geom name="AB_geom"
+        <geom name="left_AB_geom"
               type="capsule"
               fromto="0 0 0  0.21 0 0"
               size="0.012"
               mass="0.2375"
               rgba="0.15 0.45 0.85 1"/>
-        <site name="B" type="sphere" pos="0.21 0 0" size="0.014" rgba="0.2 0.6 1 1"/>
+        <site name="left_B" type="sphere" pos="0.21 0 0" size="0.014" rgba="0.2 0.6 1 1"/>
 
         <!--  BC连杆  -->
-        <body name="link_BC" pos="0.21 0 0" euler="0 -54.83458749 0">
-          <joint name="q2" pos="0 0 0" axis="0 1 0" ref="-54.83458749"/>
+        <body name="left_link_BC" pos="0.21 0 0" euler="0 -54.83458749 0">
+          <joint name="left_q2_passive" pos="0 0 0" axis="0 1 0" ref="-54.83458749"/>
 
-          <geom name="BC_geom"
+          <geom name="left_BC_geom"
                 type="capsule"
                 fromto="0 0 0  0.25 0 0"
                 size="0.012"
@@ -94,11 +95,11 @@
                 rgba="0.20 0.62 0.92 1"/>
 
           <!--  轮组  -->
-          <body name="wheel" pos="0.25 0 0">
-            <joint name="wheel_joint" pos="0 0 0" axis="0 1 0"
+          <body name="left_wheel" pos="0.25 0 0">
+            <joint name="left_wheel_joint" pos="0 0 0" axis="0 1 0"
                    damping="0.002" armature="0.001"/>
 
-            <geom name="wheel_geom"
+            <geom name="left_wheel_geom"
                   type="cylinder"
                   size="0.06 0.025"
                   euler="90 0 0"
@@ -107,52 +108,133 @@
                   contype="0" conaffinity="1"
                   friction="1.0 0.02 0.001"/>
 
-            <site name="C_left" type="sphere" pos="0 0 0" size="0.016" rgba="1 0.8 0.1 1"/>
+            <site name="left_C_wheel" type="sphere" pos="0 0 0" size="0.016" rgba="1 0.8 0.1 1"/>
           </body>
         </body>
       </body>
 
       <!--ED连杆-->
-      <body name="link_ED" pos="0 0 0" euler="0 60 0">
-        <joint name="q4" pos="0 0 0" axis="0 1 0" ref="60"/>
+      <body name="left_link_ED" pos="0 0.25 0" euler="0 60 0">
+        <joint name="left_q4" pos="0 0 0" axis="0 1 0" ref="60"/>
 
-        <geom name="ED_geom"
+        <geom name="left_ED_geom"
               type="capsule"
               fromto="0 0 0  0.21 0 0"
               size="0.012"
               mass="0.2375"
               rgba="0.85 0.35 0.20 1"/>
-        <site name="D" type="sphere" pos="0.21 0 0" size="0.014" rgba="1 0.45 0.2 1"/>
+        <site name="left_D" type="sphere" pos="0.21 0 0" size="0.014" rgba="1 0.45 0.2 1"/>
 
         <!--DC连杆-->
-        <body name="link_DC" pos="0.21 0 0" euler="0 54.83458749 0">
-          <joint name="q3_passive" pos="0 0 0" axis="0 1 0" ref="54.83458749"/>
+        <body name="left_link_DC" pos="0.21 0 0" euler="0 54.83458749 0">
+          <joint name="left_q3_passive" pos="0 0 0" axis="0 1 0" ref="54.83458749"/>
 
-          <geom name="DC_geom"
+          <geom name="left_DC_geom"
                 type="capsule"
                 fromto="0 0 0  0.25 0 0"
                 size="0.012"
                 mass="0.2375"
                 rgba="0.95 0.48 0.24 1"/>
 
-          <site name="C_right" type="sphere" pos="0.25 0 0" size="0.012" rgba="0.8 0.1 0.8 0.8"/>
+          <site name="left_C_link" type="sphere" pos="0.25 0 0" size="0.012" rgba="0.8 0.1 0.8 0.8"/>
+        </body>
+      </body>
+
+      <!--   右侧腿部   -->
+      <site name="right_hip_AE" type="sphere" pos="0 -0.25 0" size="0.018" rgba="1 0.25 0.2 1"/>
+
+      <!--   AB连杆   -->
+      <body name="right_link_AB" pos="0 -0.25 0" euler="0 120 0">
+        <joint name="right_q1" pos="0 0 0" axis="0 1 0" ref="120"/>
+
+        <geom name="right_AB_geom"
+              type="capsule"
+              fromto="0 0 0  0.21 0 0"
+              size="0.012"
+              mass="0.2375"
+              rgba="0.15 0.45 0.85 1"/>
+        <site name="right_B" type="sphere" pos="0.21 0 0" size="0.014" rgba="0.2 0.6 1 1"/>
+
+        <!--  BC连杆  -->
+        <body name="right_link_BC" pos="0.21 0 0" euler="0 -54.83458749 0">
+          <joint name="right_q2_passive" pos="0 0 0" axis="0 1 0" ref="-54.83458749"/>
+
+          <geom name="right_BC_geom"
+                type="capsule"
+                fromto="0 0 0  0.25 0 0"
+                size="0.012"
+                mass="0.2375"
+                rgba="0.20 0.62 0.92 1"/>
+
+          <!--  轮组  -->
+          <body name="right_wheel" pos="0.25 0 0">
+            <joint name="right_wheel_joint" pos="0 0 0" axis="0 1 0"
+                   damping="0.002" armature="0.001"/>
+
+            <geom name="right_wheel_geom"
+                  type="cylinder"
+                  size="0.06 0.025"
+                  euler="90 0 0"
+                  mass="0.6"
+                  rgba="0.08 0.08 0.09 1"
+                  contype="0" conaffinity="1"
+                  friction="1.0 0.02 0.001"/>
+
+            <site name="right_C_wheel" type="sphere" pos="0 0 0" size="0.016" rgba="1 0.8 0.1 1"/>
+          </body>
+        </body>
+      </body>
+
+      <!--ED连杆-->
+      <body name="right_link_ED" pos="0 -0.25 0" euler="0 60 0">
+        <joint name="right_q4" pos="0 0 0" axis="0 1 0" ref="60"/>
+
+        <geom name="right_ED_geom"
+              type="capsule"
+              fromto="0 0 0  0.21 0 0"
+              size="0.012"
+              mass="0.2375"
+              rgba="0.85 0.35 0.20 1"/>
+        <site name="right_D" type="sphere" pos="0.21 0 0" size="0.014" rgba="1 0.45 0.2 1"/>
+
+        <!--DC连杆-->
+        <body name="right_link_DC" pos="0.21 0 0" euler="0 54.83458749 0">
+          <joint name="right_q3_passive" pos="0 0 0" axis="0 1 0" ref="54.83458749"/>
+
+          <geom name="right_DC_geom"
+                type="capsule"
+                fromto="0 0 0  0.25 0 0"
+                size="0.012"
+                mass="0.2375"
+                rgba="0.95 0.48 0.24 1"/>
+
+          <site name="right_C_link" type="sphere" pos="0.25 0 0" size="0.012" rgba="0.8 0.1 0.8 0.8"/>
         </body>
       </body>
     </body>
   </worldbody>
 
   <equality>
-    <connect name="five_link_closure"
-             site1="C_left"
-             site2="C_right"
+    <connect name="left_five_link_closure"
+             site1="left_C_wheel"
+             site2="left_C_link"
+             solref="0.002 1"
+             solimp="0.95 0.99 0.001"/>
+    <connect name="right_five_link_closure"
+             site1="right_C_wheel"
+             site2="right_C_link"
              solref="0.002 1"
              solimp="0.95 0.99 0.001"/>
   </equality>
 
   <actuator>
-    <motor name="hip_q1_motor" joint="q1" gear="1" ctrlrange="-40 40"/>
-    <motor name="hip_q4_motor" joint="q4" gear="1" ctrlrange="-40 40"/>
-    <motor name="wheel_motor"  joint="wheel_joint" gear="1" ctrlrange="-10 10"/>
+    <motor name="left_hip_q1_motor" joint="left_q1" gear="1" ctrlrange="-40 40"/>
+    <motor name="left_hip_q4_motor" joint="left_q4" gear="1" ctrlrange="-40 40"/>
+    <motor name="left_wheel_motor"  joint="left_wheel_joint" gear="1" ctrlrange="-10 10"/>
+
+    <motor name="right_hip_q1_motor" joint="right_q1" gear="1" ctrlrange="-40 40"/>
+    <motor name="right_hip_q4_motor" joint="right_q4" gear="1" ctrlrange="-40 40"/>
+    <motor name="right_wheel_motor"  joint="right_wheel_joint" gear="1" ctrlrange="-10 10"/>
   </actuator>
 
   <sensor>
@@ -163,12 +245,20 @@
     <jointpos name="base_pitch_pos" joint="base_pitch"/>
     <jointvel name="base_pitch_vel" joint="base_pitch"/>
 
-    <jointpos name="q1_pos" joint="q1"/>
-    <jointvel name="q1_vel" joint="q1"/>
-    <jointpos name="q4_pos" joint="q4"/>
-    <jointvel name="q4_vel" joint="q4"/>
-    <jointpos name="wheel_pos" joint="wheel_joint"/>
-    <jointvel name="wheel_vel" joint="wheel_joint"/>
-    <framepos name="C_world_pos" objtype="site" objname="C_left"/>
+    <jointpos name="left_q1_pos" joint="left_q1"/>
+    <jointvel name="left_q1_vel" joint="left_q1"/>
+    <jointpos name="left_q4_pos" joint="left_q4"/>
+    <jointvel name="left_q4_vel" joint="left_q4"/>
+    <jointpos name="left_wheel_pos" joint="left_wheel_joint"/>
+    <jointvel name="left_wheel_vel" joint="left_wheel_joint"/>
+    <framepos name="left_C_world_pos" objtype="site" objname="left_C_wheel"/>
+
+    <jointpos name="right_q1_pos" joint="right_q1"/>
+    <jointvel name="right_q1_vel" joint="right_q1"/>
+    <jointpos name="right_q4_pos" joint="right_q4"/>
+    <jointvel name="right_q4_vel" joint="right_q4"/>
+    <jointpos name="right_wheel_pos" joint="right_wheel_joint"/>
+    <jointvel name="right_wheel_vel" joint="right_wheel_joint"/>
+    <framepos name="right_C_world_pos" objtype="site" objname="right_C_wheel"/>
   </sensor>
 </mujoco>
