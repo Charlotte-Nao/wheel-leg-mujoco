@@ -42,31 +42,15 @@
                 mass="18.9"
                 diaginertia="0.30 0.589763361 0.30"/>
 
-      <joint name="base_x"
-             type="slide"
-             axis="1 0 0"
-             damping="0.05"
-             limited="false"/>
-
-      <joint name="base_z"
-             type="slide"
-             axis="0 0 1"
-             damping="0.05"
-             limited="false"/>
-
-      <joint name="base_pitch"
-             type="hinge"
-             axis="0 1 0"
-             ref="0"
-             damping="0.02"
-             armature="0.001"
-             limited="false"/>
+      <freejoint name="base_free"/>
 
       <geom name="chassis_geom"
             type="box"
             pos="0 0 0.075"
             size="0.18 0.25 0.055"
             rgba="0.20 0.23 0.28 1"/>
+
+      <site name="chassis_imu" pos="0 0 0" size="0.01"/>
 
       <!--   左侧腿部   -->
       <site name="left_hip_AE" type="sphere" pos="0 0.25 0" size="0.018" rgba="1 0.25 0.2 1"/>
@@ -238,12 +222,10 @@
   </actuator>
 
   <sensor>
-    <jointpos name="base_x_pos" joint="base_x"/>
-    <jointvel name="base_x_vel" joint="base_x"/>
-    <jointpos name="base_z_pos" joint="base_z"/>
-    <jointvel name="base_z_vel" joint="base_z"/>
-    <jointpos name="base_pitch_pos" joint="base_pitch"/>
-    <jointvel name="base_pitch_vel" joint="base_pitch"/>
+    <framepos name="chassis_pos" objtype="body" objname="chassis"/>
+    <framequat name="chassis_quat" objtype="body" objname="chassis"/>
+    <velocimeter name="chassis_vel" site="chassis_imu"/>
+    <gyro name="chassis_gyro" site="chassis_imu"/>
 
     <jointpos name="left_q1_pos" joint="left_q1"/>
     <jointvel name="left_q1_vel" joint="left_q1"/>
