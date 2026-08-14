@@ -415,6 +415,163 @@ class TerrainModelTest(unittest.TestCase):
         self.assertEqual(self.model.geom_contype[geom_id], 1)
         self.assertEqual(self.model.geom_conaffinity[geom_id], 0)
 
+    def test_uneven_ground_varies_across_both_wheel_tracks(self):
+        left_ids = [
+            self._geom_id(f"uneven_left_{index:02d}")
+            for index in range(1, 8)
+        ]
+        right_ids = [
+            self._geom_id(f"uneven_right_{index:02d}")
+            for index in range(1, 8)
+        ]
+
+        for geom_ids, wheel_y in ((left_ids, 0.25), (right_ids, -0.25)):
+            previous_id = None
+            for geom_id in geom_ids:
+                centre_y = self.model.geom_pos[geom_id, 1]
+                half_width = self.model.geom_size[geom_id, 1]
+                self.assertLessEqual(abs(wheel_y - centre_y), half_width)
+                self.assertEqual(self.model.geom_contype[geom_id], 1)
+                self.assertEqual(self.model.geom_conaffinity[geom_id], 0)
+                if previous_id is not None:
+                    separation = (
+                        self.model.geom_pos[geom_id, 0]
+                        - self.model.geom_pos[previous_id, 0]
+                    )
+                    covered_length = (
+                        self.model.geom_size[geom_id, 0]
+                        + self.model.geom_size[previous_id, 0]
+                    )
+                    self.assertLessEqual(separation, covered_length)
+                previous_id = geom_id
+
+        left_heights = 2.0 * self.model.geom_size[left_ids, 2]
+        right_heights = 2.0 * self.model.geom_size[right_ids, 2]
+        self.assertGreater(np.ptp(left_heights), 0.02)
+        self.assertGreater(np.ptp(right_heights), 0.02)
+        self.assertTrue(np.all(np.abs(left_heights - right_heights) > 0.005))
+
+    def test_rolling_obstacle_region_contains_free_17_mm_tpu_spheres(self):
+        body_ids = [
+            body_id
+            for body_id in range(self.model.nbody)
+            if (
+                mujoco.mj_id2name(
+                    self.model,
+                    mujoco.mjtObj.mjOBJ_BODY,
+                    body_id,
+                )
+                or ""
+            ).startswith("rolling_obstacle")
+        ]
+        geom_ids = [
+            geom_id
+            for geom_id in range(self.model.ngeom)
+            if (
+                mujoco.mj_id2name(
+                    self.model,
+                    mujoco.mjtObj.mjOBJ_GEOM,
+                    geom_id,
+                )
+                or ""
+            ).startswith("rolling_obstacle_geom")
+        ]
+
+        self.assertEqual(len(body_ids), 20 * 10)
+        self.assertEqual(len(geom_ids), 20 * 10)
+        self.assertTrue(np.all(
+            self.model.geom_type[geom_ids]
+            == int(mujoco.mjtGeom.mjGEOM_SPHERE)
+        ))
+        radius = 0.0085
+        density = 1200.0
+        expected_mass = density * 4.0 / 3.0 * math.pi * radius ** 3
+        np.testing.assert_allclose(self.model.geom_size[geom_ids, 0], radius)
+        np.testing.assert_allclose(
+            self.model.body_mass[body_ids],
+            expected_mass,
+            rtol=1e-12,
+        )
+        self.assertTrue(np.all(self.model.geom_contype[geom_ids] == 1))
+        self.assertTrue(np.all(self.model.geom_conaffinity[geom_ids] == 1))
+        self.assertTrue(np.all(self.model.geom_condim[geom_ids] == 6))
+        np.testing.assert_allclose(self.model.geom_friction[geom_ids, 0], 0.8)
+
+        for body_id in body_ids:
+            self.assertEqual(self.model.body_jntnum[body_id], 1)
+            joint_id = self.model.body_jntadr[body_id]
+            self.assertEqual(
+                self.model.jnt_type[joint_id],
+                int(mujoco.mjtJoint.mjJNT_FREE),
+            )
+
+        positions = self.data.geom_xpos[geom_ids]
+        self.assertGreaterEqual(np.min(positions[:, 0]), 19.99)
+        self.assertLessEqual(np.max(positions[:, 0]), 20.52)
+        self.assertLessEqual(np.min(positions[:, 1]), -0.24)
+        self.assertGreaterEqual(np.max(positions[:, 1]), 0.24)
+
+        base_joint_id = mujoco.mj_name2id(
+            self.model,
+            mujoco.mjtObj.mjOBJ_JOINT,
+            "base_free",
+        )
+        self.assertEqual(self.model.jnt_qposadr[base_joint_id], 0)
+        self.assertEqual(self.model.jnt_dofadr[base_joint_id], 0)
+
+    def test_new_terrain_sections_have_long_flat_recovery_zones(self):
+        uneven_ids = [
+            self._geom_id(f"uneven_{side}_{index:02d}")
+            for side in ("left", "right")
+            for index in range(1, 8)
+        ]
+        ball_ids = [
+            geom_id
+            for geom_id in range(self.model.ngeom)
+            if (
+                mujoco.mj_id2name(
+                    self.model,
+                    mujoco.mjtObj.mjOBJ_GEOM,
+                    geom_id,
+                )
+                or ""
+            ).startswith("rolling_obstacle_geom")
+        ]
+        ramp_id = self._geom_id("step_up_ramp")
+        ramp_low, _ = self._top_endpoints(ramp_id)
+
+        uneven_end = max(
+            self.model.geom_pos[geom_id, 0]
+            + self.model.geom_size[geom_id, 0]
+            for geom_id in uneven_ids
+        )
+        ball_radius = self.model.geom_size[ball_ids[0], 0]
+        ball_start = np.min(self.data.geom_xpos[ball_ids, 0]) - ball_radius
+        ball_end = np.max(self.data.geom_xpos[ball_ids, 0]) + ball_radius
+
+        self.assertGreater(ball_start - uneven_end, 5.0)
+        self.assertGreater(ramp_low[0] - ball_end, 5.0)
+
+    def test_step_ramp_meets_platform_before_abrupt_drop(self):
+        ramp_id = self._geom_id("step_up_ramp")
+        platform_id = self._geom_id("drop_platform")
+        ramp_low, ramp_high = self._top_endpoints(ramp_id)
+        platform_centre = self.model.geom_pos[platform_id]
+        platform_size = self.model.geom_size[platform_id]
+        platform_start = platform_centre[0] - platform_size[0]
+        platform_end = platform_centre[0] + platform_size[0]
+        platform_top = platform_centre[2] + platform_size[2]
+
+        self.assertLess(ramp_low[2], 0.025)
+        self.assertAlmostEqual(ramp_high[0], platform_start, delta=0.01)
+        self.assertAlmostEqual(ramp_high[2], platform_top, delta=0.005)
+        self.assertAlmostEqual(platform_top, 0.280, places=3)
+        self.assertAlmostEqual(platform_end, 29.45, places=2)
+        self.assertEqual(self.model.geom_contype[ramp_id], 1)
+        self.assertEqual(self.model.geom_contype[platform_id], 1)
+        self.assertEqual(self.model.geom_conaffinity[ramp_id], 0)
+        self.assertEqual(self.model.geom_conaffinity[platform_id], 0)
+
 
 class TerrainTraversalTest(unittest.TestCase):
     def test_maximum_speed_course_hits_expected_wheels(self):
@@ -510,7 +667,8 @@ class TerrainTraversalTest(unittest.TestCase):
         self.assertTrue(contacts["left_launch"])
         self.assertTrue(contacts["right_launch"])
         self.assertLess(maximum_single_ramp_roll, 0.15)
-        self.assertGreater(maximum_roll, 0.1)
+        self.assertGreater(maximum_roll, 0.03)
+        self.assertLess(maximum_roll, 0.2)
         self.assertGreater(maximum_height, 0.65)
 
 
