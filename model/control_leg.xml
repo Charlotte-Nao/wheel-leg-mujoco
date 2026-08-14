@@ -35,6 +35,26 @@
           rgba="0.82 0.84 0.86 1"
           contype="1" conaffinity="0"/>
 
+    <!-- 单侧斜坡：只覆盖左轮轨迹，用于左右腿不同地形测试 -->
+    <geom name="left_wheel_ramp"
+          type="box"
+          pos="2.0 0.25 0.140"
+          size="0.75 0.14 0.01"
+          euler="0 -10 0"
+          friction="1.0 0.02 0.001"
+          rgba="0.78 0.25 0.18 1"
+          contype="1" conaffinity="0"/>
+
+    <!-- 全宽飞坡：两轮同时上坡，末端无平台以测试起跳和落地 -->
+    <geom name="launch_ramp"
+          type="box"
+          pos="5.5 0 0.218"
+          size="1.0 0.70 0.01"
+          euler="0 -12 0"
+          friction="1.0 0.02 0.001"
+          rgba="0.92 0.68 0.12 1"
+          contype="1" conaffinity="0"/>
+
 <!-- 车体 -->
     <body name="chassis" pos="0 0 0.5" euler="0 0 0">
 

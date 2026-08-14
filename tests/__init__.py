@@ -1,0 +1,1 @@
+"""Control architecture regression tests."""

@@ -13,7 +13,10 @@ sys.path.insert(0, str(ROOT))
 import mujoco
 import mujoco.viewer
 
-from simulation.controller import Controller
+from control.controller import Controller
+from control.targets import TargetStore
+from simulation.keyboard_control import KeyboardTargetController
+from simulation.mujoco_adapter import MujocoAdapter
 
 
 MODEL_PATH = ROOT / "model" / "control_leg.xml"
@@ -24,41 +27,66 @@ def main():
     data = mujoco.MjData(model)
 
     mujoco.mj_forward(model, data)
-    controller = Controller(model)
-    controller.reset(data)
+    targets = TargetStore()
+    controller = Controller(targets)
+    adapter = MujocoAdapter(model)
+    adapter.reset(data)
+    controller.reset()
 
     last_print = 0.0
     last_time = data.time
 
-    with mujoco.viewer.launch_passive(model, data) as viewer:
+    with (
+        mujoco.viewer.launch_passive(model, data) as viewer,
+        KeyboardTargetController(targets) as keyboard,
+    ):
+        viewer.cam.type = mujoco.mjtCamera.mjCAMERA_TRACKING
+        viewer.cam.trackbodyid = adapter.chassis
+        viewer.cam.distance = 3.0
+        viewer.cam.azimuth = 135.0
+        viewer.cam.elevation = -20.0
+
         while viewer.is_running():
             start = time.perf_counter()
 
             if data.time < last_time:
                 mujoco.mj_forward(model, data)
-                controller.reset(data)
+                adapter.reset(data)
+                controller.reset()
+                keyboard.reset()
             last_time = data.time
 
-            state = controller.update(data)
+            target = keyboard.update(model.opt.timestep)
+            state = adapter.read_state(data)
+            command, telemetry = controller.update(
+                state,
+                model.opt.timestep,
+            )
+            adapter.write_command(data, command)
             mujoco.mj_step(model, data)
             viewer.sync()
 
             if data.time - last_print >= 0.1:
                 print(
                     f"t={data.time:6.3f}  "
-                    f"L={state['L']:.4f}  "
-                    f"theta={state['theta']:+.4f}  "
-                    f"gamma={state['gamma']:+.4f}  "
-                    f"phi={state['phi']:+.4f}  "
-                    f"alpha={state['alpha']:+.4f}  "
-                    f"x={state['x']:+.4f}  "
-                    f"F={state['F']:+.2f}  "
-                    f"T={state['T']:+.2f}  "
-                    f"Tp={state['Tp']:+.2f}  "
-                    f"delta=({state['delta_F']:+.2f},"
-                    f"{state['delta_T']:+.2f},{state['delta_Tp']:+.2f})  "
-                    f"left_tau=({state['left_tau1']:+.2f},{state['left_tau4']:+.2f})  "
-                    f"right_tau=({state['right_tau1']:+.2f},{state['right_tau4']:+.2f})"
+                    f"L={telemetry.length:.4f}  "
+                    f"theta={telemetry.theta:+.4f}  "
+                    f"gamma={telemetry.roll:+.4f}  "
+                    f"phi={telemetry.pitch:+.4f}  "
+                    f"alpha={telemetry.yaw:+.4f}  "
+                    f"x={telemetry.x:+.4f}  "
+                    f"target_dx={target.x_rate:+.2f}  "
+                    f"target_yaw={target.yaw:+.3f}  "
+                    f"F={telemetry.common_force:+.2f}  "
+                    f"T={telemetry.common_wheel_torque:+.2f}  "
+                    f"Tp={telemetry.common_leg_torque:+.2f}  "
+                    f"delta=({telemetry.delta_force:+.2f},"
+                    f"{telemetry.delta_wheel_torque:+.2f},"
+                    f"{telemetry.delta_leg_torque:+.2f})  "
+                    f"left_tau=({telemetry.left_q1_torque:+.2f},"
+                    f"{telemetry.left_q4_torque:+.2f})  "
+                    f"right_tau=({telemetry.right_q1_torque:+.2f},"
+                    f"{telemetry.right_q4_torque:+.2f})"
                 )
                 last_print = data.time
 
